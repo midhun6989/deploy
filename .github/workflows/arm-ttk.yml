@@ -14,8 +14,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Run ARM-TTK with on mainTemplate.json
+    - name: Run ARM-TTK
       uses: venura9/arm-ttk@master
       with: 
-        path: azure2/marketplace/
-        file: mainTemplate.json
+        path: azure/marketplace/
