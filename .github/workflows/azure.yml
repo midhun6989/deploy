@@ -1,9 +1,13 @@
-name: Run Azure Login with OpenID Connect
-on: [push]
+name: Run Azure Login
 
-permissions:
-      id-token: write
-      contents: read
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
       
 jobs: 
   build-and-deploy:
