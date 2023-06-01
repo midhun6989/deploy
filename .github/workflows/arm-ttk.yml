@@ -18,3 +18,4 @@ jobs:
       uses: venura9/arm-ttk@master
       with: 
         path: azure/marketplace/
+        file: mainParameters.json
