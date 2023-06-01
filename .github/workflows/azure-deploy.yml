@@ -6,8 +6,7 @@ on:
       - dev
     paths:
       - '.github/workflows/azure-deploy.yml'
-      - 'azure/**'
-  workflow_dispatch:     
+      - 'azure/**' 
 
 env:
   RESOURCE_GROUP_NAME: z-mod-stack-dev-rg
@@ -20,18 +19,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2    
+      uses: actions/checkout@v2
+    - name: Run ARM-TTK
+      uses: venura9/arm-ttk@master
+      with: 
+        path: azure/marketplace/     
     - name: 'AZ CLI login'
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    - uses: Azure/CLI@v1
+    - name: 'Create Resource Group'
+      uses: Azure/CLI@v1
       with:
         inlineScript: |
           #!/bin/bash
           az group create --name ${{ env.RESOURCE_GROUP_NAME }} --location ${{ env.RESOURCE_GROUP_LOCATION }}
-          echo "Azure resource group created"    
-    - uses: azure/arm-deploy@v1
+          echo "Azure Resource Group is created"    
+    - name: 'Deploy OCP Cluster'
+      uses: azure/arm-deploy@v1
       with:
         resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
         template: ${{ env.ARM_TEMPLATE }}

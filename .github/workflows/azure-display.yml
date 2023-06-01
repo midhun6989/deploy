@@ -1,0 +1,22 @@
+name: Run Azure CLI commands
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - '.github/workflows/azure-display.yml'   
+
+jobs: 
+  display:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'AZ CLI login'
+      uses: azure/login@v1
+      with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: 'AZ CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd        
