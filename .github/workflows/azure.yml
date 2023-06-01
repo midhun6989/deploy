@@ -16,7 +16,7 @@ jobs:
 #         creds: ${{ secrets.AZURE_CREDENTIALS }}
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           creds: ${{ vars.AZURE_CLIENT_SECRET }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+#         tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
   
     - name: 'Run Azure CLI commands'
