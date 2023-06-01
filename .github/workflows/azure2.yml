@@ -12,6 +12,8 @@ jobs:
   arm-ttk:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
     - name: Run ARM-TTK with 'path'
       uses: venura9/arm-ttk@master
       with: 
