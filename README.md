@@ -1,2 +1,2 @@
 # zmodstack
-For deployments to AWS and Azure
+For deployments to Azure
