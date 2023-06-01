@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/azure-deploy.yml'
       - 'azure/**'
+  workflow_dispatch:     
 
 env:
   RESOURCE_GROUP_NAME: z-mod-stack-dev-rg
