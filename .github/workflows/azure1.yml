@@ -12,7 +12,7 @@ on:
 #      contents: read
 
 jobs: 
-  build-and-deploy:
+  build-and-deploy-1:
     runs-on: ubuntu-latest
     steps:
     - name: 'AZ CLI login 1'
