@@ -5,8 +5,8 @@ on:
     branches:
       - dev
     paths:
-      - '.github/workflows/azure2.yml'
-      - 'azure2/marketplace/**'
+      - '.github/workflows/arm-ttk.yml'
+      - 'azure/marketplace/**'
 
 jobs: 
   arm-ttk:
@@ -18,4 +18,3 @@ jobs:
       uses: venura9/arm-ttk@master
       with: 
         path: azure2/marketplace/
-        file: mainTemplate.json

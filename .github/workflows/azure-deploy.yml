@@ -5,14 +5,14 @@ on:
     branches:
       - dev
     paths:
-      - '.github/workflows/azure1.yml'
-      - 'azure1/**'
+      - '.github/workflows/azure-deploy.yml'
+      - 'azure/**'
 
 env:
   RESOURCE_GROUP_NAME: z-mod-stack-dev-rg
   RESOURCE_GROUP_LOCATION: eastus
-  ARM_TEMPLATE: azure1/marketplace/mainTemplate.json
-  ARM_PARAMETERS: azure1/marketplace/mainParameters.json
+  ARM_TEMPLATE: azure/marketplace/mainTemplate.json
+  ARM_PARAMETERS: azure/marketplace/mainParameters.json
 
 jobs: 
   deploy:
@@ -20,7 +20,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2    
-    - name: 'AZ CLI login 1'
+    - name: 'AZ CLI login'
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
