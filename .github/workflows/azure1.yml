@@ -7,24 +7,23 @@ on:
     paths:
       - 'azure1/**'
 
-#permissions:
-#      id-token: write
-#      contents: read
+env:
+  RESOURCE_GROUP_DEV: z-mod-stack-dev-rg
+  ARM_TEMPLATE: azure1/marketplace/mainTemplate.json
+  ARM_PARAMETERS: azure2/marketplace/mainParameters.json
 
 jobs: 
   build-and-deploy-1:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2    
     - name: 'AZ CLI login 1'
       uses: azure/login@v1
       with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-#         client-id: ${{ vars.AZURE_CLIENT_ID }}
-#         tenant-id: ${{ vars.AZURE_TENANT_ID }}
-#         subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-  
-    - name: 'Run Azure CLI commands 1'
-      run: |
-          az account show
-          az group list
-          pwd
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - uses: azure/arm-deploy@v1
+      with:
+        resourceGroupName: ${{ env.RESOURCE_GROUP_DEV }}
+        template: ${{ env.ARM_TEMPLATE }}
+        parameters: ${{ env.ARM_PARAMETERS }}
