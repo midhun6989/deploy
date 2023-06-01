@@ -1,4 +1,4 @@
-name: Run Azure Login 1
+name: Azure Deployment
 
 on:
   push:
@@ -15,7 +15,7 @@ env:
   ARM_PARAMETERS: azure1/marketplace/mainParameters.json
 
 jobs: 
-  build-and-deploy-1:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository

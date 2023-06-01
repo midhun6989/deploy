@@ -1,4 +1,4 @@
-name: Run Azure Login 2
+name: Run ARM-TTK
 
 on:
   push:
