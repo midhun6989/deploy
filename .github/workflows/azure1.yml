@@ -12,7 +12,7 @@ env:
   RESOURCE_GROUP_NAME: z-mod-stack-dev-rg
   RESOURCE_GROUP_LOCATION: eastus
   ARM_TEMPLATE: azure1/marketplace/mainTemplate.json
-  ARM_PARAMETERS: azure2/marketplace/mainParameters.json
+  ARM_PARAMETERS: azure1/marketplace/mainParameters.json
 
 jobs: 
   build-and-deploy-1:

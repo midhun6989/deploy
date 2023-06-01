@@ -5,26 +5,15 @@ on:
     branches:
       - dev
     paths:
-      - 'azure2/**'
-
-#permissions:
-#      id-token: write
-#      contents: read
+      - '.github/workflows/azure2.yml'
+      - 'azure2/marketplace/**'
 
 jobs: 
-  build-and-deploy-2:
+  arm-ttk:
     runs-on: ubuntu-latest
     steps:
-    - name: 'AZ CLI login 2'
-      uses: azure/login@v1
-      with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-#         client-id: ${{ vars.AZURE_CLIENT_ID }}
-#         tenant-id: ${{ vars.AZURE_TENANT_ID }}
-#         subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-  
-    - name: 'Run Azure CLI commands 2'
-      run: |
-          az account show
-          az group list
-          pwd
+    - name: Run ARM-TTK with 'path'
+      uses: venura9/arm-ttk@master
+      id: path-test
+      with: 
+        path: azure2/marketplace/      
