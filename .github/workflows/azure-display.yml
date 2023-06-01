@@ -17,6 +17,4 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: 'AZ CLI commands'
       run: |
-          az account show
-          az group list
-          pwd        
+          az account show     
