@@ -14,7 +14,7 @@ jobs:
     - name: 'AZ CLI login'
       uses: azure/login@v1
       with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: 'AZ CLI commands'
       run: |
-          az account show     
+        az account show     
