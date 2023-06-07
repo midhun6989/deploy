@@ -22,10 +22,16 @@ jobs:
       uses: venura9/arm-ttk@master
       with: 
         path: ${{ env.ARM_TTK_PATH }}     
+    - name: Run script file
+      run: |
+         pip install 'ansible[azure]'
+         ansible-galaxy collection install azure.azcollection
+         pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
+      shell: bash
     - name: 'AZ CLI login'
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  
     - name: Ansible Playbook Runner
       uses: euclid1990/actions-ansible@v2
       with:
