@@ -9,6 +9,7 @@ on:
       - 'azure/**' 
 
 env:
+  ARM_TTK_PATH: azure/marketplace/
   ANSIBLE_PLAYBOOK: azure/ansible/run-provision.yml 
 
 jobs: 
@@ -20,7 +21,7 @@ jobs:
     - name: Run ARM-TTK
       uses: venura9/arm-ttk@master
       with: 
-        path: azure/marketplace/     
+        path: ${{ env.ARM_TTK_PATH }}     
     - name: 'AZ CLI login'
       uses: azure/login@v1
       with:
