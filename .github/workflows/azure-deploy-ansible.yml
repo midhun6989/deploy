@@ -21,17 +21,15 @@ jobs:
     - name: Run ARM-TTK
       uses: venura9/arm-ttk@master
       with: 
-        path: ${{ env.ARM_TTK_PATH }}     
+        path: ${{ env.ARM_TTK_PATH }}
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9    
     - name: Run script file 1
       run: |
          pip install 'ansible[azure]'
-      shell: bash
-    - name: Run script file 2
-      run: |
          ansible-galaxy collection install azure.azcollection
-      shell: bash
-    - name: Run script file 3
-      run: |
          pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
       shell: bash  
     - name: 'AZ CLI login'
