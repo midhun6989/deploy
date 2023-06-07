@@ -26,12 +26,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9    
-    - name: Run script file 1
+    - name: Install dependencies Including Ansible
       run: |
-         pip install 'ansible[azure]'
-         ansible-galaxy collection install azure.azcollection
-         pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
-      shell: bash  
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f test-requirements.txt ]; then pip install -r test-requirements.txt; fi 
     - name: 'AZ CLI login'
       uses: azure/login@v1
       with:
