@@ -1,0 +1,31 @@
+name: Azure Deployment
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - '.github/workflows/azure-deploy-ansible.yml'
+      - 'azure/**' 
+
+env:
+  ANSIBLE_PLAYBOOK: azure/ansible/run-provision.yml 
+
+jobs: 
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Run ARM-TTK
+      uses: venura9/arm-ttk@master
+      with: 
+        path: azure/marketplace/     
+    - name: 'AZ CLI login'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Ansible Playbook Runner
+      uses: euclid1990/actions-ansible@v2
+      with:
+        playbook: ${{ env.ANSIBLE_PLAYBOOK }}
