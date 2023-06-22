@@ -6,7 +6,6 @@
   
   vars:
     RESOURCE_GROUP_DEV: z-mod-stack-dev-rg
-    LOCATION: eastus
     DEPLOYMENT_NAME: OCP-Cluster-Dev
     ARM_TEMPLATE: "{{ lookup('file', '../marketplace/mainTemplate.json') }}"
     ARM_PARAMETERS: "{{ (lookup('file', '../marketplace/mainParameters.json') | from_json).parameters }}"
