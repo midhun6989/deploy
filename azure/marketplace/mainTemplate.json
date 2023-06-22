@@ -242,17 +242,6 @@
         "description": "OpenShift Version"
       }
     },
-    "zModStackLicenseAgreement": {
-      "type": "string",
-      "defaultValue": "reject",
-      "allowedValues": [
-        "accept",
-        "reject"
-      ],
-      "metadata": {
-        "description": "Accept License Agreement"
-      }
-    },
     "managedIdName": {
       "type": "string",
       "defaultValue": "[concat('zmodmgdid',substring(uniqueString(resourceGroup().id),1,7))]",
@@ -293,7 +282,6 @@
     "vTrue": true,
     "bootstrapPublicIpDnsLabel": "[concat('bootstrapdns', uniqueString(resourceGroup().id))]",
     "sshKeyPath": "[concat('/home/', parameters('bootstrapAdminUsername'), '/.ssh/authorized_keys')]",
-    "bootstrapScriptUrl": "https://raw.githubusercontent.com/midhun6989/experiments/github-url/azure/scripts/bootstrap.sh",
     "bootstrapScriptFileName": "bootstrap.sh",
     "subscriptionId": "[subscription().subscriptionId]",
     "tenantId": "[subscription().tenantId]",
