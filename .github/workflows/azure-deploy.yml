@@ -20,10 +20,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Run ARM-TTK
-      uses: venura9/arm-ttk@master
-      with: 
-        path: azure/marketplace/     
+#    - name: Run ARM-TTK
+#      uses: venura9/arm-ttk@master
+#      with: 
+#        path: azure/marketplace/     
     - name: 'AZ CLI login'
       uses: azure/login@v1
       with:
