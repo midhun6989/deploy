@@ -242,6 +242,17 @@
         "description": "OpenShift Version"
       }
     },
+    "zModStackLicenseAgreement": {
+      "type": "string",
+      "defaultValue": "reject",
+      "allowedValues": [
+        "accept",
+        "reject"
+      ],
+      "metadata": {
+        "description": "Accept License Agreement"
+      }
+    },
     "managedIdName": {
       "type": "string",
       "defaultValue": "[concat('zmodmgdid',substring(uniqueString(resourceGroup().id),1,7))]",
@@ -251,7 +262,7 @@
     }
   },
   "variables": {
-   "redHatTags": {
+    "redHatTags": {
       "app": "OpenshiftContainerPlatform",
       "version": "4.10.x",
       "platform": "AzurePublic"
@@ -282,6 +293,7 @@
     "vTrue": true,
     "bootstrapPublicIpDnsLabel": "[concat('bootstrapdns', uniqueString(resourceGroup().id))]",
     "sshKeyPath": "[concat('/home/', parameters('bootstrapAdminUsername'), '/.ssh/authorized_keys')]",
+    "bootstrapScriptUrl": "https://github.com/midhun6989/experiments/blob/github-url/azure/scripts/bootstrap.sh",
     "bootstrapScriptFileName": "bootstrap.sh",
     "subscriptionId": "[subscription().subscriptionId]",
     "tenantId": "[subscription().tenantId]",
@@ -595,6 +607,119 @@
           }
         ]
       }
+    },
+    {
+      "condition": "[equals(parameters('zModStackLicenseAgreement'), 'accept')]",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('bootstrapHostname'), '/bootstrap.sh')]",
+      "location": "[parameters('location')]",
+      "apiVersion": "2022-11-01",
+      "dependsOn": [
+        "[variables('bootstrapHostname')]"
+      ],
+      "tags": {
+        "displayName": "OpenShift",
+        "app": "[variables('redHatTags').app]",
+        "version": "[variables('redHatTags').version]",
+        "platform": "[variables('redHatTags').platform]"
+      },
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[variables('bootstrapScriptUrl')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat('bash ', variables('bootstrapScriptFileName'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2022-07-01",
+      "name": "[parameters('clusterName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "accessPolicies": [
+          {
+            "objectId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities',parameters('managedIdName')), '2018-11-30').principalId]",
+            "permissions": {
+              "secrets": [
+                "get"
+              ]
+            },
+            "tenantId": "[subscription().tenantId]"
+          }
+        ],
+        "createMode": "default",
+        "enabledForDeployment": false,
+        "enabledForDiskEncryption": false,
+        "enabledForTemplateDeployment": true,
+        "enableRbacAuthorization": false,
+        "enableSoftDelete": false,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow"
+        },
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "softDeleteRetentionInDays": 30,
+        "tenantId": "[subscription().tenantId]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2022-07-01",
+      "name": "[format('{0}/{1}', parameters('clusterName'), 'pullSecret')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('clusterName'))]"
+      ],
+      "properties": {
+        "contentType": "string",
+        "value": "[parameters('pullSecret')]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2022-07-01",
+      "name": "[format('{0}/{1}', parameters('clusterName'), 'openshiftPassword')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('clusterName'))]"
+      ],
+      "properties": {
+        "contentType": "string",
+        "value": "[parameters('openshiftPassword')]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2022-07-01",
+      "name": "[format('{0}/{1}', parameters('clusterName'), 'apiKey')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('clusterName'))]"
+      ],
+      "properties": {
+        "contentType": "string",
+        "value": "[parameters('apiKey')]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2022-07-01",
+      "name": "[format('{0}/{1}', parameters('clusterName'), 'aadApplicationSecret')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('clusterName'))]"
+      ],
+      "properties": {
+        "contentType": "string",
+        "value": "[parameters('aadApplicationSecret')]"
+      }
     }
   ],
   "outputs": {
@@ -693,11 +818,6 @@
       "condition": "[equals(variables('verboseOutput'), 'true')]",
       "type": "string",
       "value": "[variables('outboundType')]"
-    },
-    "openshift Deployment Script File Name": {
-      "condition": "[equals(variables('verboseOutput'), 'true')]",
-      "type": "string",
-      "value": "[variables('bootstrapScriptFileName')]"
     },
     "subscription Id": {
       "condition": "[equals(variables('verboseOutput'), 'true')]",
