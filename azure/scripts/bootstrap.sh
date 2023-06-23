@@ -9,7 +9,7 @@ sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
 sudo dnf install -y azure-cli jq
 
-echo "Setup Azure CLI new"
+echo "Setup Azure CLI"
 az login --identity
 
 echo $(date) " - ############## Deploy Script ####################"
