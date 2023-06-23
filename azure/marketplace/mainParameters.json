@@ -2,6 +2,12 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "artifactsLocation": {
+			"value": "https://zmodstackstorage.blob.core.windows.net/"
+		},
+		"artifactsLocationSasToken": {
+			"value": "?sv=2022-11-02&ss=b&srt=o&sp=r&se=2023-07-02T04:10:25Z&st=2023-06-22T20:10:25Z&spr=https&sig=W%2BIlSubt9eeLXoAsbS%2F1OzIeQXHYR9XMFAap0Kv8G14%3D"
+		},
     "location": {
       "value": "eastus"
     },
