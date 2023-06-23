@@ -2,20 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "artifactsLocation": {
-			"type": "string",
-			"metadata": {
-				"description": "The base URL where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
-			},
-			"defaultValue": "https://zmodstackstorage.blob.core.windows.net/"
-		},
-		"artifactsLocationSasToken": {
-			"type": "securestring",
-			"metadata": {
-				"description": "Token for the base URL where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
-			},
-			"defaultValue": ""
-		},
     "location": {
       "type": "string",
       "metadata": {
@@ -308,7 +294,6 @@
     "bootstrapPublicIpDnsLabel": "[concat('bootstrapdns', uniqueString(resourceGroup().id))]",
     "sshKeyPath": "[concat('/home/', parameters('bootstrapAdminUsername'), '/.ssh/authorized_keys')]",
     "bootstrapScriptUrl": "https://raw.githubusercontent.com/midhun6989/experiments/github-url/azure/scripts/bootstrap.sh",
-    //"bootstrapScriptUrl": "[uri(parameters('artifactsLocation'), concat('scripts/bootstrap.sh', parameters('artifactsLocationSasToken')))]",
     "bootstrapScriptFileName": "bootstrap.sh",
     "subscriptionId": "[subscription().subscriptionId]",
     "tenantId": "[subscription().tenantId]",
