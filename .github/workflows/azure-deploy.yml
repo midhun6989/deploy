@@ -21,7 +21,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Run ARM-TTK
-      uses: aliencube/arm-ttk-actions@v0.3
+      #uses: aliencube/arm-ttk-actions@v0.3
+      uses: venura9/arm-ttk@1.0
       with: 
         path: azure/marketplace/     
     - name: 'AZ CLI login'
