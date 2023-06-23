@@ -307,7 +307,7 @@
     "vTrue": true,
     "bootstrapPublicIpDnsLabel": "[concat('bootstrapdns', uniqueString(resourceGroup().id))]",
     "sshKeyPath": "[concat('/home/', parameters('bootstrapAdminUsername'), '/.ssh/authorized_keys')]",
-    "bootstrapScriptUrl": "https://raw.github.ibm.com/IBM-Z-and-Cloud-Modernization-Stack/azure/github-url/scripts/bootstrap.sh?token=AADB42VZVHN7GDH3AIMCQLDET2SUW",
+    "bootstrapScriptUrl": "https://raw.githubusercontent.com/midhun6989/experiments/github-url/azure/scripts/bootstrap.sh",
     //"bootstrapScriptUrl": "[uri(parameters('artifactsLocation'), concat('scripts/bootstrap.sh', parameters('artifactsLocationSasToken')))]",
     "bootstrapScriptFileName": "bootstrap.sh",
     "subscriptionId": "[subscription().subscriptionId]",
