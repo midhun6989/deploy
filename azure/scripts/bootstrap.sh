@@ -404,22 +404,10 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/openshiftfou
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc adm policy add-cluster-role-to-user cluster-admin '$OPENSHIFT_USERNAME'"
 
 echo $(date) " - Setting up IBM Operator Catalog"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cat >  $INSTALLERHOME/openshiftfourx/ibm-operator-catalog.yaml <<EOF
-apiVersion: operators.coreos.com/v1alpha1
-kind: CatalogSource
-metadata:
-  name: ibm-operator-catalog
-  namespace: openshift-marketplace
-spec:
-  sourceType: grpc
-  image: icr.io/cpopen/ibm-operator-catalog
-  displayName: IBM Operator Catalog
-  publisher: IBM
-  updateStrategy:
-    registryPoll:
-      interval: 30m
-EOF"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/openshiftfourx/ibm-operator-catalog.yaml"
+
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone git@github.com:midhun6989/experiments.git ./experiments"
+
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f ./experiments/azure/scripts/ibm-operator-catalog.yaml"
  
 echo $(date) " - IBM Operator Catalog setup complete"
 
