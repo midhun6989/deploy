@@ -7,7 +7,7 @@ sudo dnf update -y
 echo "Installing Azure CLI"
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
-sudo dnf install -y azure-cli jq
+sudo dnf install -y azure-cli jq git
 
 echo "Setup Azure CLI"
 az login --identity
@@ -152,7 +152,7 @@ cat > /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json <<EOF
 EOF
 echo $(date) " - Setup Azure Credentials for OCP - Complete"
 
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone git@github.com:midhun6989/experiments.git $INSTALLERHOME"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https://github.com/midhun6989/experiments.git $INSTALLERHOME/experiments"
 
 echo $(date) " - Setup Install config"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
@@ -164,7 +164,7 @@ zones="zones:
       - '2'
       - '3'"
 fi
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp .$INSTALLERHOME/azure/scripts/install-config.yml $INSTALLERHOME/openshiftfourx/install-config.yml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/experiments/azure/scripts/install-config.yml $INSTALLERHOME/openshiftfourx/install-config.yml"
 echo $(date) " - Setup Install config - Complete"
 
 #runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
@@ -188,13 +188,13 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc project openshift-machine-api"
 ##Enable/Disable Autoscaler
 if [[ $ENABLE_AUTOSCALER == "true" ]]; then
   echo $(date) " - Setting up Cluster Autoscaler"
-  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/azure/scripts/cluster-autoscaler.yml"
+  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/experiments/azure/scripts/cluster-autoscaler.yml"
   echo $(date) " - Cluster Autoscaler setup complete"
   echo $(date) " - Setting up Machine Autoscaler"
-  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/azure/scripts/machine-autoscaler.yml"
+  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yml"
   echo $(date) " - Machine Autoscaler setup complete"
   echo $(date) " - Setting up Machine health checks"
-  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/azure/scripts/machine-health-check.yml"
+  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yml"
   echo $(date) " - Machine Health Check setup complete"
 fi
 
@@ -202,12 +202,12 @@ echo $(date) " - Creating $OPENSHIFT_USERNAME user"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "htpasswd -c -B -b /tmp/.htpasswd '$OPENSHIFT_USERNAME' '$OPENSHIFT_PASSWORD'"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 5"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create secret generic htpass-secret --from-file=htpasswd=/tmp/.htpasswd -n openshift-config"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/azure/scripts/openshift-user.yml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/experiments/azure/scripts/openshift-auth.yml"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc adm policy add-cluster-role-to-user cluster-admin '$OPENSHIFT_USERNAME'"
 
 echo $(date) " - Setting up IBM Operator Catalog"
 
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/azure/scripts/ibm-operator-catalog.yml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/experiments/azure/scripts/ibm-operator-catalog.yml"
  
 echo $(date) " - IBM Operator Catalog setup complete"
 
