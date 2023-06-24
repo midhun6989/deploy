@@ -114,7 +114,6 @@ sudo yum update -y --disablerepo=* --enablerepo="*microsoft*"
 echo $(date) " - Disable and enable repo completed"
 
 export INSTALLERHOME=/mnt/openshift
-mkdir -p $INSTALLERHOME/experiments
 chown $BOOTSTRAP_ADMIN_USERNAME:$BOOTSTRAP_ADMIN_USERNAME $INSTALLERHOME
 
 if [ $? -eq 0 ]
@@ -152,6 +151,7 @@ cat > /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json <<EOF
 EOF
 echo $(date) " - Setup Azure Credentials for OCP - Complete"
 
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/experiments"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https://github.com/midhun6989/experiments.git $INSTALLERHOME/experiments"
 
 echo $(date) " - Setup Install config"
