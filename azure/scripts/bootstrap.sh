@@ -152,9 +152,11 @@ cat > /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json <<EOF
 EOF
 echo $(date) " - Setup Azure Credentials for OCP - Complete"
 
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone git@github.com:midhun6989/experiments.git $INSTALLERHOME"
+
 echo $(date) " - Setup Install config"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
+#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
 zones=""
 if [[ $SINGLE_ZONE_OR_MULTI_ZONE == "az" ]]; then
 zones="zones:
@@ -162,61 +164,10 @@ zones="zones:
       - '2'
       - '3'"
 fi
-cat > $INSTALLERHOME/openshiftfourx/install-config.yaml <<EOF
-apiVersion: v1
-baseDomain: $DNS_ZONE_NAME
-compute:
-- hyperthreading: Enabled
-  name: worker
-  platform: 
-    azure:
-      type: $COMPUTE_VM_SIZE
-      osDisk:
-        diskSizeGB: $COMPUTE_DISK_SIZE
-        diskType: $COMPUTE_DISK_TYPE
-      $zones
-  replicas: $COMPUTE_INSTANCE_COUNT
-controlPlane:
-  hyperthreading: Enabled
-  name: master
-  platform: 
-    azure:
-      type: $CONTROL_PLANE_VM_SIZE
-      osDisk:
-        diskSizeGB: $CONTROL_PLANE_DISK_SIZE
-        diskType: $CONTROL_PLANE_DISK_TYPE
-      $zones
-  replicas: $CONTROLPLANE_INSTANCE_COUNT
-metadata:
-  creationTimestamp: null
-  name: $CLUSTER_NAME
-networking:
-  clusterNetwork:
-  - cidr: $CLUSTER_NETWORK_CIDR
-    hostPrefix: $HOST_ADDRESS_PREFIX
-  machineCIDR: $VIRTUAL_NETWORK_CIDR
-  networkType: OpenShiftSDN
-  serviceNetwork:
-  - $SERVICE_NETWORK_CIDR
-platform:
-  azure:
-    baseDomainResourceGroupName: $DNS_ZONE_RESOURCE_GROUP
-    region: $LOCATION
-    networkResourceGroupName: $NETWORK_RESOURCE_GROUP
-    virtualNetwork: $VIRTUAL_NETWORK_NAME
-    controlPlaneSubnet: $CONTROL_PLANE_SUBNET_NAME
-    computeSubnet: $COMPUTE_SUBNET_NAME
-    outboundType: $OUTBOUND_TYPE
-    resourceGroupName: $CLUSTER_RESOURCE_GROUP_NAME
-pullSecret: '$PULL_SECRET'
-fips: $ENABLE_FIPS
-publish: $PRIVATE_OR_PUBLIC
-sshKey: |
-  $BOOTSTRAP_SSH_PUBLIC_KEY
-EOF
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp .$INSTALLERHOME/azure/scripts/install-config.yml $INSTALLERHOME/openshiftfourx/install-config.yml"
 echo $(date) " - Setup Install config - Complete"
 
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
+#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
 
 echo $(date) " - Install OCP"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
@@ -232,182 +183,31 @@ echo $(date) "Kube Config setup done"
 #Switch to Machine API project
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc project openshift-machine-api"
 
-echo $(date) " - Setting up Cluster Autoscaler"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cat > $INSTALLERHOME/openshiftfourx/cluster-autoscaler.yaml <<EOF
-apiVersion: 'autoscaling.openshift.io/v1'
-kind: 'ClusterAutoscaler'
-metadata:
-  name: 'default'
-spec:
-  podPriorityThreshold: -10
-  resourceLimits:
-    maxNodesTotal: 24
-    cores:
-      min: 48
-      max: 128
-    memory:
-      min: 128
-      max: 512
-  scaleDown: 
-    enabled: true
-    delayAfterAdd: '3m'
-    delayAfterDelete: '2m'
-    delayAfterFailure: '30s'
-    unneededTime: '60s'
-EOF"
-
-echo $(date) " - Cluster Autoscaler setup complete"
-
-echo $(date) " - Setting up Machine Autoscaler"
-clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cat > $INSTALLERHOME/openshiftfourx/machine-autoscaler.yaml <<EOF
----
-kind: MachineAutoscaler
-apiVersion: autoscaling.openshift.io/v1beta1
-metadata:
-  name: ${clusterid}-compute-${LOCATION}1
-  namespace: 'openshift-machine-api'
-spec:
-  minReplicas: 1
-  maxReplicas: 12
-  scaleTargetRef:
-    apiVersion: machine.openshift.io/v1beta1
-    kind: MachineSet
-    name: ${clusterid}-compute-${LOCATION}1
----
-kind: MachineAutoscaler
-apiVersion: autoscaling.openshift.io/v1beta1
-metadata:
-  name: ${clusterid}-compute-${LOCATION}2
-  namespace: openshift-machine-api
-spec:
-  minReplicas: 1
-  maxReplicas: 12
-  scaleTargetRef:
-    apiVersion: machine.openshift.io/v1beta1
-    kind: MachineSet
-    name: ${clusterid}-compute-${LOCATION}2
----
-kind: MachineAutoscaler
-apiVersion: autoscaling.openshift.io/v1beta1
-metadata:
-  name: ${clusterid}-compute-${LOCATION}3
-  namespace: openshift-machine-api
-spec:
-  minReplicas: 1
-  maxReplicas: 12
-  scaleTargetRef:
-    apiVersion: machine.openshift.io/v1beta1
-    kind: MachineSet
-    name: ${clusterid}-compute-${LOCATION}3
-EOF"
-
-echo $(date) " - Machine Autoscaler setup complete"
-
-echo $(date) " - Setting up Machine health checks"
-clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cat > $INSTALLERHOME/openshiftfourx/machine-health-check.yaml <<EOF
----
-apiVersion: machine.openshift.io/v1beta1
-kind: MachineHealthCheck
-metadata:
-  name: health-check-compute-${LOCATION}1
-  namespace: openshift-machine-api
-spec:
-  selector:
-    matchLabels:
-      machine.openshift.io/cluster-api-machine-role: compute
-      machine.openshift.io/cluster-api-machine-type: compute
-      machine.openshift.io/cluster-api-machineset: ${clusterid}-compute-${LOCATION}1
-  unhealthyConditions:
-  - type:    \"Ready\"
-    timeout: \"300s\"
-    status: \"False\"
-  - type:    \"Ready\"
-    timeout: \"300s\"
-    status: \"Unknown\"
-  maxUnhealthy: \"30%\"
----
-apiVersion: machine.openshift.io/v1beta1
-kind: MachineHealthCheck
-metadata:
-  name: health-check-compute-${LOCATION}2 
-  namespace: openshift-machine-api
-spec:
-  selector:
-    matchLabels:
-      machine.openshift.io/cluster-api-machine-role: compute
-      machine.openshift.io/cluster-api-machine-type: compute
-      machine.openshift.io/cluster-api-machineset: ${clusterid}-compute-${LOCATION}2
-  unhealthyConditions:
-  - type:    \"Ready\"
-    timeout: \"300s\"
-    status: \"False\"
-  - type:    \"Ready\"
-    timeout: \"300s\"
-    status: \"Unknown\"
-  maxUnhealthy: \"30%\"
----
-apiVersion: machine.openshift.io/v1beta1
-kind: MachineHealthCheck
-metadata:
-  name: health-check-compute-${LOCATION}3 
-  namespace: openshift-machine-api
-spec:
-  selector:
-    matchLabels:
-      machine.openshift.io/cluster-api-machine-role: compute
-      machine.openshift.io/cluster-api-machine-type: compute
-      machine.openshift.io/cluster-api-machineset: ${clusterid}-compute-${LOCATION}3
-  unhealthyConditions:
-  - type:    \"Ready\"
-    timeout: \"300s\"
-    status: \"False\"
-  - type:    \"Ready\"
-    timeout: \"300s\"
-    status: \"Unknown\"
-  maxUnhealthy: \"30%\"
-EOF"
+#clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
 
 ##Enable/Disable Autoscaler
 if [[ $ENABLE_AUTOSCALER == "true" ]]; then
-  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/openshiftfourx/cluster-autoscaler.yaml"
-  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/openshiftfourx/machine-autoscaler.yaml"
-  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/openshiftfourx/machine-health-check.yaml"
+  echo $(date) " - Setting up Cluster Autoscaler"
+  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/azure/scripts/cluster-autoscaler.yml"
+  echo $(date) " - Cluster Autoscaler setup complete"
+  echo $(date) " - Setting up Machine Autoscaler"
+  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/azure/scripts/machine-autoscaler.yml"
+  echo $(date) " - Machine Autoscaler setup complete"
+  echo $(date) " - Setting up Machine health checks"
+  runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/azure/scripts/machine-health-check.yml"
+  echo $(date) " - Machine Health Check setup complete"
 fi
-
-echo $(date) " - Machine Health Check setup complete"
 
 echo $(date) " - Creating $OPENSHIFT_USERNAME user"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "htpasswd -c -B -b /tmp/.htpasswd '$OPENSHIFT_USERNAME' '$OPENSHIFT_PASSWORD'"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 5"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create secret generic htpass-secret --from-file=htpasswd=/tmp/.htpasswd -n openshift-config"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cat >  $INSTALLERHOME/openshiftfourx/auth.yaml <<EOF
-apiVersion: config.openshift.io/v1
-kind: OAuth
-metadata:
-  name: cluster
-spec:
-  tokenConfig:
-    accessTokenMaxAgeSeconds: 172800
-  identityProviders:
-  - name: htpasswdProvider 
-    challenge: true 
-    login: true 
-    mappingMethod: claim 
-    type: HTPasswd
-    htpasswd:
-      fileData:
-        name: htpass-secret
-EOF"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/openshiftfourx/auth.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/azure/scripts/openshift-user.yml"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc adm policy add-cluster-role-to-user cluster-admin '$OPENSHIFT_USERNAME'"
 
 echo $(date) " - Setting up IBM Operator Catalog"
 
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone git@github.com:midhun6989/experiments.git ./experiments"
-
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f ./experiments/azure/scripts/ibm-operator-catalog.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/azure/scripts/ibm-operator-catalog.yml"
  
 echo $(date) " - IBM Operator Catalog setup complete"
 
