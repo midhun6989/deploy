@@ -114,6 +114,7 @@ sudo yum update -y --disablerepo=* --enablerepo="*microsoft*"
 echo $(date) " - Disable and enable repo completed"
 
 export INSTALLERHOME=/mnt/openshift
+mkdir -p $INSTALLERHOME
 chown $BOOTSTRAP_ADMIN_USERNAME:$BOOTSTRAP_ADMIN_USERNAME $INSTALLERHOME
 
 if [ $? -eq 0 ]
