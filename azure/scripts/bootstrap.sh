@@ -160,7 +160,7 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
 zones=""
 if [[ $SINGLE_ZONE_OR_MULTI_ZONE == "az" ]]; then
-zones="zones:
+export zones="zones:
       - '1'
       - '2'
       - '3'"
