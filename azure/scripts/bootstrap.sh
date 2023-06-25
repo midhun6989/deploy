@@ -172,6 +172,7 @@ echo $(date) " - Setup Install config - Complete"
 
 echo $(date) " - Install OCP"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
+echo $(date) " - After export"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "$INSTALLERHOME/openshift-install create cluster --dir=$INSTALLERHOME/openshiftfourx --log-level=debug"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 120"
 echo $(date) " - OCP Install Complete"
