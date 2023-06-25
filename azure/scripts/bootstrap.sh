@@ -161,9 +161,9 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/ins
 export zones=""
 if [[ $SINGLE_ZONE_OR_MULTI_ZONE == "az" ]]; then
 export zones="zones:
-             - '1'
-             - '2'
-             - '3'"
+                - '1'
+                - '2'
+                - '3'"
 fi
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/experiments/azure/scripts/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config.yaml"
 echo $(date) " - Setup Install config - Complete"
