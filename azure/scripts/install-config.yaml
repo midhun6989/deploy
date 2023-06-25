@@ -33,7 +33,7 @@ metadata:
   name: $CLUSTER_NAME
 networking:
   clusterNetwork:
-  - cidr: $CLUSTER_NETWORK_CIDR
+  - cidr: '172.20.0.0/14'
     hostPrefix: $HOST_ADDRESS_PREFIX
   machineCIDR: $VIRTUAL_NETWORK_CIDR
   networkType: OpenShiftSDN
