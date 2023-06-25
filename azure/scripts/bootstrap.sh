@@ -155,9 +155,42 @@ echo $(date) " - Setup Azure Credentials for OCP - Complete"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/experiments"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https://github.com/midhun6989/experiments.git $INSTALLERHOME/experiments"
 
+echo $(date) " - Variables substitution - Start"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$DNS_ZONE_NAME/$DNS_ZONE_NAME/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$COMPUTE_VM_SIZE/$COMPUTE_VM_SIZE/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$COMPUTE_DISK_SIZE/$COMPUTE_DISK_SIZE/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$COMPUTE_DISK_TYPE/$COMPUTE_DISK_TYPE/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$COMPUTE_INSTANCE_COUNT/$COMPUTE_INSTANCE_COUNT/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CONTROL_PLANE_VM_SIZE/$CONTROL_PLANE_VM_SIZE/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CONTROL_PLANE_DISK_SIZE/$CONTROL_PLANE_DISK_SIZE/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CONTROL_PLANE_DISK_TYPE/$CONTROL_PLANE_DISK_TYPE/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CONTROLPLANE_INSTANCE_COUNT/$CONTROLPLANE_INSTANCE_COUNT/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CLUSTER_NAME/$CLUSTER_NAME/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CLUSTER_NETWORK_CIDR/$CLUSTER_NETWORK_CIDR/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$HOST_ADDRESS_PREFIX/$HOST_ADDRESS_PREFIX/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$VIRTUAL_NETWORK_CIDR/$VIRTUAL_NETWORK_CIDR/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$SERVICE_NETWORK_CIDR/$SERVICE_NETWORK_CIDR/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$DNS_ZONE_RESOURCE_GROUP/$DNS_ZONE_RESOURCE_GROUP/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$LOCATION/$LOCATION/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$NETWORK_RESOURCE_GROUP/$NETWORK_RESOURCE_GROUP/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$VIRTUAL_NETWORK_NAME/$VIRTUAL_NETWORK_NAME/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CONTROL_PLANE_SUBNET_NAME/$CONTROL_PLANE_SUBNET_NAME/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$COMPUTE_SUBNET_NAME/$COMPUTE_SUBNET_NAME/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$OUTBOUND_TYPE/$OUTBOUND_TYPE/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$CLUSTER_RESOURCE_GROUP_NAME/$CLUSTER_RESOURCE_GROUP_NAME/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$PULL_SECRET/$PULL_SECRET/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$ENABLE_FIPS/$ENABLE_FIPS/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$PRIVATE_OR_PUBLIC/$PRIVATE_OR_PUBLIC/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\$BOOTSTRAP_SSH_PUBLIC_KEY/$BOOTSTRAP_SSH_PUBLIC_KEY/g\" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\${clusterid}/$clusterid/g\" $INSTALLERHOME/experiments/azure/scripts/machine-autoscalar.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\${LOCATION}/$LOCATION/g\" $INSTALLERHOME/experiments/azure/scripts/machine-autoscalar.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\${clusterid}/$clusterid/g\" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sed -i \"s/\${LOCATION}/$LOCATION/g\" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml"
+echo $(date) " - Variables substitution - Complete"
+
 echo $(date) " - Setup Install config"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
+#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
 zones=""
 if [[ $SINGLE_ZONE_OR_MULTI_ZONE == "az" ]]; then
 zones="zones:
@@ -165,10 +198,11 @@ zones="zones:
       - '2'
       - '3'"
 fi
+
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/experiments/azure/scripts/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config.yaml"
 echo $(date) " - Setup Install config - Complete"
 
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
+#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
 
 echo $(date) " - Install OCP"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
@@ -184,7 +218,7 @@ echo $(date) "Kube Config setup done"
 #Switch to Machine API project
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc project openshift-machine-api"
 
-#clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
+clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
 
 ##Enable/Disable Autoscaler
 if [[ $ENABLE_AUTOSCALER == "true" ]]; then
