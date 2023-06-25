@@ -24,9 +24,9 @@ controlPlane:
         diskSizeGB: $CONTROL_PLANE_DISK_SIZE
         diskType: $CONTROL_PLANE_DISK_TYPE
       zones:
-        - '1'
-        - '2'
-        - '3'
+      - '1'
+      - '2'
+      - '3'
   replicas: $CONTROLPLANE_INSTANCE_COUNT
 metadata:
   creationTimestamp: null
