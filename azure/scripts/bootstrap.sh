@@ -166,10 +166,10 @@ sed -i "s/\$CONTROL_PLANE_DISK_SIZE/$CONTROL_PLANE_DISK_SIZE/g" $INSTALLERHOME/e
 sed -i "s/\$CONTROL_PLANE_DISK_TYPE/$CONTROL_PLANE_DISK_TYPE/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$CONTROLPLANE_INSTANCE_COUNT/$CONTROLPLANE_INSTANCE_COUNT/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$CLUSTER_NAME/$CLUSTER_NAME/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-sed "s|\$CLUSTER_NETWORK_CIDR|$CLUSTER_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+#sed "s|\$CLUSTER_NETWORK_CIDR|$CLUSTER_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$HOST_ADDRESS_PREFIX/$HOST_ADDRESS_PREFIX/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-sed "s|\$VIRTUAL_NETWORK_CIDR|$VIRTUAL_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-sed "s|\$SERVICE_NETWORK_CIDR|$SERVICE_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+#sed "s|\$VIRTUAL_NETWORK_CIDR|$VIRTUAL_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+#sed "s|\$SERVICE_NETWORK_CIDR|$SERVICE_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$DNS_ZONE_RESOURCE_GROUP/$DNS_ZONE_RESOURCE_GROUP/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$LOCATION/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$NETWORK_RESOURCE_GROUP/$NETWORK_RESOURCE_GROUP/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
