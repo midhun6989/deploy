@@ -157,7 +157,7 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https:/
 
 echo $(date) " - Setup Install config"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
 zones=""
 if [[ $SINGLE_ZONE_OR_MULTI_ZONE == "az" ]]; then
 zones="zones:
@@ -165,10 +165,10 @@ zones="zones:
       - '2'
       - '3'"
 fi
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/experiments/azure/scripts/install-config.yml $INSTALLERHOME/openshiftfourx/install-config.yml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/experiments/azure/scripts/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config.yaml"
 echo $(date) " - Setup Install config - Complete"
 
-runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yml $INSTALLERHOME/openshiftfourx/install-config-backup.yml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
 
 echo $(date) " - Install OCP"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
