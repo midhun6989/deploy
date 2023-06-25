@@ -9,7 +9,10 @@ compute:
       osDisk:
         diskSizeGB: $COMPUTE_DISK_SIZE
         diskType: $COMPUTE_DISK_TYPE
-      $zones
+      zones:
+      - '1'
+      - '2'
+      - '3'
   replicas: $COMPUTE_INSTANCE_COUNT
 controlPlane:
   hyperthreading: Enabled
@@ -20,7 +23,10 @@ controlPlane:
       osDisk:
         diskSizeGB: $CONTROL_PLANE_DISK_SIZE
         diskType: $CONTROL_PLANE_DISK_TYPE
-      $zones
+      zones:
+        - '1'
+        - '2'
+        - '3'
   replicas: $CONTROLPLANE_INSTANCE_COUNT
 metadata:
   creationTimestamp: null
