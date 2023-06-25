@@ -157,7 +157,7 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https:/
 
 echo $(date) " - Setup Install config"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
-#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yml"
 zones=""
 if [[ $SINGLE_ZONE_OR_MULTI_ZONE == "az" ]]; then
 zones="zones:
@@ -168,11 +168,10 @@ fi
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/experiments/azure/scripts/install-config.yml $INSTALLERHOME/openshiftfourx/install-config.yml"
 echo $(date) " - Setup Install config - Complete"
 
-#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
+runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yml $INSTALLERHOME/openshiftfourx/install-config-backup.yml"
 
 echo $(date) " - Install OCP"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
-echo $(date) " - After export command"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "$INSTALLERHOME/openshift-install create cluster --dir=$INSTALLERHOME/openshiftfourx --log-level=debug"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 120"
 echo $(date) " - OCP Install Complete"
