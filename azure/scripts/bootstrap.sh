@@ -1,18 +1,18 @@
 #!/bin/bash
 set -ex
 
-echo "Updating packages and installing package dependencies"
+echo $(date) " - Updating packages and installing package dependencies"
 sudo dnf update -y
 
-echo "Installing Azure CLI"
+echo $(date) " - Installing Azure CLI, jq and git"
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
 sudo dnf install -y azure-cli jq git
 
-echo "Setup Azure CLI"
+echo $(date) " - Setup Azure CLI Login"
 az login --identity
 
-echo $(date) " - ############## Deploy Script ####################"
+echo $(date) " - ############### Deploy Script - Start ###############"
 
 # FIXME - if the user-assigned identity is given a scope at the subscription level, then the command below will
 # fail because multiple resource groups will be listed
@@ -30,11 +30,9 @@ DEPLOYMENT_VARS=$(az deployment group export -g $RESOURCE_GROUP -n $DEPLOYMENT_N
 function armParm {
   # local parmOut=$(az deployment group show -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME --query properties.parameters.${1})
   local parmOut=$(echo $DEPLOYMENT_PARMS | jq -r ".${1}")
-
   if [[ "$parmOut" == *keyVault* ]]; then
     vaultName=$(echo $parmOut | jq -r '.reference.keyVault.id' | rev | cut -d/ -f1 | rev)
-    secretName=$(echo $parmOut | jq -r '.reference.secretName')
-    
+    secretName=$(echo $parmOut | jq -r '.reference.secretName') 
     # FIXME - Access controls may prevent access to this KV - not sure if this will be a real-world usage scenario
     # echo "Attempting to retrieve ARM parameter '${1}' from keyvault '${vaultName}'"
     az keyvault secret show --vault-name ${vaultName} -n ${secretName} | jq -r '.value'
@@ -109,9 +107,9 @@ while [[ $(/usr/bin/ps xua | /usr/bin/grep cloud-init | /usr/bin/grep -v grep) ]
 done
 
 # TODO - why do we need this?
-echo $(date) " - Disable and enable repo starting"
+echo $(date) " - Disable and enable repo - Start"
 sudo yum update -y --disablerepo=* --enablerepo="*microsoft*"
-echo $(date) " - Disable and enable repo completed"
+echo $(date) " - Disable and enable repo - Complete"
 
 export INSTALLERHOME=/mnt/openshift
 mkdir -p $INSTALLERHOME
@@ -125,26 +123,25 @@ else
 	exit 20
 fi
 
-echo $(date) " - Install Podman"
+echo $(date) " - Install Podman - Start"
 yum install -y podman
-echo $(date) " - Install Podman Complete"
+echo $(date) " - Install Podman - Complete"
 
-echo $(date) " - Install httpd-tools"
+echo $(date) " - Install httpd-tools - Start"
 yum install -y httpd-tools
-echo $(date) " - Install httpd-tools Complete"
+echo $(date) " - Install httpd-tools - Complete"
 
-echo $(date) " - Download Binaries"
+echo $(date) " - Download Binaries - Start"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-$OPENSHIFT_VERSION/openshift-install-linux.tar.gz"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-$OPENSHIFT_VERSION/openshift-client-linux.tar.gz"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "tar -xvf openshift-install-linux.tar.gz -C $INSTALLERHOME"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sudo tar -xvf openshift-client-linux.tar.gz -C /usr/bin"
-
 chmod +x /usr/bin/kubectl
 chmod +x /usr/bin/oc
 chmod +x $INSTALLERHOME/openshift-install
-echo $(date) " - Download Binaries Done."
+echo $(date) " - Download Binaries - Complete."
 
-echo $(date) " - Setup Azure Credentials for OCP"
+echo $(date) " - Setup Azure Credentials for OCP - Start"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p /home/$BOOTSTRAP_ADMIN_USERNAME/.azure"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json"
 cat > /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json <<EOF
@@ -152,9 +149,11 @@ cat > /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json <<EOF
 EOF
 echo $(date) " - Setup Azure Credentials for OCP - Complete"
 
+# Create a directory in Bootstrap VM and clone the GitHub repository
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/experiments"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https://github.com/midhun6989/experiments.git $INSTALLERHOME/experiments"
 
+# Substitute the variables in install-config.yaml file
 echo $(date) " - Variables substitution - Start"
 sed -i "s/\$DNS_ZONE_NAME/$DNS_ZONE_NAME/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$COMPUTE_VM_SIZE/$COMPUTE_VM_SIZE/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
@@ -166,16 +165,13 @@ sed -i "s/\$CONTROL_PLANE_DISK_SIZE/$CONTROL_PLANE_DISK_SIZE/g" $INSTALLERHOME/e
 sed -i "s/\$CONTROL_PLANE_DISK_TYPE/$CONTROL_PLANE_DISK_TYPE/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$CONTROLPLANE_INSTANCE_COUNT/$CONTROLPLANE_INSTANCE_COUNT/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$CLUSTER_NAME/$CLUSTER_NAME/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-#sed "s|\$CLUSTER_NETWORK_CIDR|$CLUSTER_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed  "s|\$CLUSTER_NETWORK_CIDR|$CLUSTER_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml
 rm $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 mv $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$HOST_ADDRESS_PREFIX/$HOST_ADDRESS_PREFIX/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-#sed "s|\$VIRTUAL_NETWORK_CIDR|$VIRTUAL_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed  "s|\$VIRTUAL_NETWORK_CIDR|$VIRTUAL_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml > $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml
 rm $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 mv $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-#sed "s|\$SERVICE_NETWORK_CIDR|$SERVICE_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed  "s|\$SERVICE_NETWORK_CIDR|$SERVICE_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml > $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml
 rm $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 mv $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
@@ -193,66 +189,60 @@ sed -i "s/\$PRIVATE_OR_PUBLIC/$PRIVATE_OR_PUBLIC/g" $INSTALLERHOME/experiments/a
 sed -i "s/\$BOOTSTRAP_SSH_PUBLIC_KEY/$BOOTSTRAP_SSH_PUBLIC_KEY/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 echo $(date) " - Variables substitution - Complete"
 
-echo $(date) " - Setup Install config"
+echo $(date) " - Setup Install Config - Start"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
-#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch $INSTALLERHOME/openshiftfourx/install-config.yaml"
-zones=""
-if [[ $SINGLE_ZONE_OR_MULTI_ZONE == "az" ]]; then
-zones="zones:
-      - '1'
-      - '2'
-      - '3'"
-fi
-
+if [[ $SINGLE_ZONE_OR_MULTI_ZONE != "az" ]]; then
+  zones=`grep -A3 'zones' $INSTALLERHOME/experiments/azure/scripts/install-config.yaml`
+  grep -v $zones $INSTALLERHOME/experiments/azure/scripts/install-config.yaml > $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml
+  rm $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+  mv $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml $INSTALLERHOME/experiments/azure/scripts/install-config.yaml    
+fi  
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/experiments/azure/scripts/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config.yaml"
-echo $(date) " - Setup Install config - Complete"
+echo $(date) " - Setup Install Config - Complete"
 
-#runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/install-config.yaml $INSTALLERHOME/openshiftfourx/install-config-backup.yaml"
-
-echo $(date) " - Install OCP"
+echo $(date) " - OCP Install - Start"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "$INSTALLERHOME/openshift-install create cluster --dir=$INSTALLERHOME/openshiftfourx --log-level=debug"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 120"
-echo $(date) " - OCP Install Complete"
+echo $(date) " - OCP Install - Complete"
 
-echo $(date) " - Kube Config setup"
+echo $(date) " - Setup Kube Config - Start"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p /home/$BOOTSTRAP_ADMIN_USERNAME/.kube"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLERHOME/openshiftfourx/auth/kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config"
-echo $(date) "Kube Config setup done"
+echo $(date) " - Setup Kube Config - Complete"
 
 #Switch to Machine API project
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc project openshift-machine-api"
 
-clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
-sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
-sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
-sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
-sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
-
-##Enable/Disable Autoscaler
+# Enable or Disable Autoscaler
 if [[ $ENABLE_AUTOSCALER == "true" ]]; then
-  echo $(date) " - Setting up Cluster Autoscaler"
+  clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
+  sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
+  sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
+  sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
+  sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
+  echo $(date) " - Setup Cluster Autoscaler - Start"
   runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/experiments/azure/scripts/cluster-autoscaler.yaml"
-  echo $(date) " - Cluster Autoscaler setup complete"
-  echo $(date) " - Setting up Machine Autoscaler"
+  echo $(date) " - Setup Cluster Autoscaler - Complete"
+  echo $(date) " - Setup Machine Autoscaler - Start"
   runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml"
-  echo $(date) " - Machine Autoscaler setup complete"
-  echo $(date) " - Setting up Machine health checks"
+  echo $(date) " - Setup Machine Autoscaler - Complete"
+  echo $(date) " - Setup Machine Health Checks - Start"
   runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml"
-  echo $(date) " - Machine Health Check setup complete"
+  echo $(date) " - Setup Machine Health Checks - Complete"
 fi
 
-echo $(date) " - Creating $OPENSHIFT_USERNAME user"
+# Create a User for Login to OpenShift Console
+echo $(date) " - Creating $OPENSHIFT_USERNAME User - Start"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "htpasswd -c -B -b /tmp/.htpasswd '$OPENSHIFT_USERNAME' '$OPENSHIFT_PASSWORD'"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 5"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create secret generic htpass-secret --from-file=htpasswd=/tmp/.htpasswd -n openshift-config"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/experiments/azure/scripts/openshift-auth.yaml"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc adm policy add-cluster-role-to-user cluster-admin '$OPENSHIFT_USERNAME'"
+echo $(date) " - Creating $OPENSHIFT_USERNAME User - Complete"
 
 echo $(date) " - Setting up IBM Operator Catalog"
-
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLERHOME/experiments/azure/scripts/ibm-operator-catalog.yaml"
- 
 echo $(date) " - IBM Operator Catalog setup complete"
 
-echo $(date) " - ############## Script Complete ####################"
+echo $(date) " - ############### Deploy Script - Complete ###############"
