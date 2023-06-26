@@ -155,6 +155,8 @@ echo $(date) " - Setup Azure Credentials for OCP - Complete"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/experiments"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https://github.com/midhun6989/experiments.git $INSTALLERHOME/experiments"
 
+clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
+
 echo $(date) " - Variables substitution - Start"
 sed -i "s/\$DNS_ZONE_NAME/$DNS_ZONE_NAME/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$COMPUTE_VM_SIZE/$COMPUTE_VM_SIZE/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
@@ -167,9 +169,18 @@ sed -i "s/\$CONTROL_PLANE_DISK_TYPE/$CONTROL_PLANE_DISK_TYPE/g" $INSTALLERHOME/e
 sed -i "s/\$CONTROLPLANE_INSTANCE_COUNT/$CONTROLPLANE_INSTANCE_COUNT/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$CLUSTER_NAME/$CLUSTER_NAME/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 #sed "s|\$CLUSTER_NETWORK_CIDR|$CLUSTER_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+sed  "s|\$CLUSTER_NETWORK_CIDR|$CLUSTER_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml
+rm $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+mv $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$HOST_ADDRESS_PREFIX/$HOST_ADDRESS_PREFIX/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 #sed "s|\$VIRTUAL_NETWORK_CIDR|$VIRTUAL_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+sed  "s|\$VIRTUAL_NETWORK_CIDR|$VIRTUAL_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml > $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml
+rm $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+mv $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 #sed "s|\$SERVICE_NETWORK_CIDR|$SERVICE_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml >> $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+sed  "s|\$SERVICE_NETWORK_CIDR|$SERVICE_NETWORK_CIDR|g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml > $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml
+rm $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
+mv $INSTALLERHOME/experiments/azure/scripts/install-config-new.yaml $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$DNS_ZONE_RESOURCE_GROUP/$DNS_ZONE_RESOURCE_GROUP/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$LOCATION/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$NETWORK_RESOURCE_GROUP/$NETWORK_RESOURCE_GROUP/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
@@ -182,8 +193,8 @@ sed -i "s/\$PULL_SECRET/$PULL_SECRET/g" $INSTALLERHOME/experiments/azure/scripts
 sed -i "s/\$ENABLE_FIPS/$ENABLE_FIPS/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$PRIVATE_OR_PUBLIC/$PRIVATE_OR_PUBLIC/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$BOOTSTRAP_SSH_PUBLIC_KEY/$BOOTSTRAP_SSH_PUBLIC_KEY/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscalar.yaml
-sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscalar.yaml
+sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
+sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
 sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
 sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
 echo $(date) " - Variables substitution - Complete"
@@ -217,8 +228,6 @@ echo $(date) "Kube Config setup done"
 
 #Switch to Machine API project
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc project openshift-machine-api"
-
-clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
 
 ##Enable/Disable Autoscaler
 if [[ $ENABLE_AUTOSCALER == "true" ]]; then
