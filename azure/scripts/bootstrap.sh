@@ -1,15 +1,15 @@
 #!/bin/bash
 set -ex
 
-echo $(date) " - Updating packages and installing package dependencies"
+echo $(date) " - Updating Packages and Installing Package Dependencies"
 sudo dnf update -y
 
-echo $(date) " - Installing Azure CLI, jq and git"
+echo $(date) " - Installing Azure CLI, JQ and GIT"
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
 sudo dnf install -y azure-cli jq git
 
-echo $(date) " - Setup Azure CLI Login"
+echo $(date) " - Azure CLI Login"
 az login --identity
 
 echo $(date) " - ############### Deploy Script - Start ###############"
