@@ -155,8 +155,6 @@ echo $(date) " - Setup Azure Credentials for OCP - Complete"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/experiments"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https://github.com/midhun6989/experiments.git $INSTALLERHOME/experiments"
 
-clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
-
 echo $(date) " - Variables substitution - Start"
 sed -i "s/\$DNS_ZONE_NAME/$DNS_ZONE_NAME/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$COMPUTE_VM_SIZE/$COMPUTE_VM_SIZE/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
@@ -193,10 +191,6 @@ sed -i "s/\$PULL_SECRET/$PULL_SECRET/g" $INSTALLERHOME/experiments/azure/scripts
 sed -i "s/\$ENABLE_FIPS/$ENABLE_FIPS/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$PRIVATE_OR_PUBLIC/$PRIVATE_OR_PUBLIC/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$BOOTSTRAP_SSH_PUBLIC_KEY/$BOOTSTRAP_SSH_PUBLIC_KEY/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
-sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
-sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
-sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
 echo $(date) " - Variables substitution - Complete"
 
 echo $(date) " - Setup Install config"
@@ -228,6 +222,12 @@ echo $(date) "Kube Config setup done"
 
 #Switch to Machine API project
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc project openshift-machine-api"
+
+clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
+sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
+sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-autoscaler.yaml
+sed -i "s/\${clusterid}/$clusterid/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
+sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLERHOME/experiments/azure/scripts/machine-health-check.yaml
 
 ##Enable/Disable Autoscaler
 if [[ $ENABLE_AUTOSCALER == "true" ]]; then
