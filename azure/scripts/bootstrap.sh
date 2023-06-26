@@ -1,6 +1,46 @@
 #!/bin/bash
 set -ex
 
+export BOOTSTRAP_ADMIN_USERNAME=$(armParm bootstrapAdminUsername)
+export OPENSHIFT_PASSWORD=$(vaultSecret openshiftPassword)
+export BOOTSTRAP_SSH_PUBLIC_KEY=$(armParm bootstrapSshPublicKey)
+export COMPUTE_INSTANCE_COUNT=$(armParm computeInstanceCount)
+export CONTROLPLANE_INSTANCE_COUNT=$(armParm controlplaneInstanceCount)
+export SUBSCRIPTION_ID=$(az account show | jq -r '.id')
+export TENANT_ID=$(az account show | jq -r '.tenantId')
+export AAD_APPLICATION_ID=$(armParm aadApplicationId)
+export AAD_APPLICATION_SECRET=$(vaultSecret aadApplicationSecret)
+export RESOURCE_GROUP_NAME=$RESOURCE_GROUP
+export LOCATION=$RESOURCE_GROUP_LOCATION
+export VIRTUAL_NETWORK_NAME=$(armParm virtualNetworkName)
+export SINGLE_ZONE_OR_MULTI_ZONE=az
+export DNS_ZONE_NAME=$(armParm dnsZoneName)
+export CONTROL_PLANE_VM_SIZE=$(armParm controlplaneVmSize)
+export CONTROL_PLANE_DISK_SIZE=$(armParm controlplaneDiskSize)
+export CONTROL_PLANE_DISK_TYPE=$(armParm controlplaneDiskType)
+export COMPUTE_VM_SIZE=$(armParm computeVmSize)
+export COMPUTE_DISK_SIZE=$(armParm computeDiskSize)
+export COMPUTE_DISK_TYPE=$(armParm computeDiskType)
+export CLUSTER_NAME=$(armParm clusterName)
+export CLUSTER_NETWORK_CIDR=$(armVar clusterNetworkCidr)
+export HOST_ADDRESS_PREFIX=$(armVar hostAddressPrefix)
+export VIRTUAL_NETWORK_CIDR=$(armParm virtualNetworkCIDR)
+export SERVICE_NETWORK_CIDR=$(armVar serviceNetworkCidr)
+export DNS_ZONE_RESOURCE_GROUP=$(armParm dnsZoneResourceGroup)
+export NETWORK_RESOURCE_GROUP=$RESOURCE_GROUP
+export CONTROL_PLANE_SUBNET_NAME=$(armVar controlplaneSubnetName)
+export COMPUTE_SUBNET_NAME=$(armVar computeSubnetName)
+export PULL_SECRET=$(vaultSecret pullSecret)
+export ENABLE_FIPS=$(armVar enableFips)
+export PRIVATE_OR_PUBLIC_ENDPOINTS=$(armVar privateOrPublicEndpoints)
+export PRIVATE_OR_PUBLIC=$([ "$PRIVATE_OR_PUBLIC_ENDPOINTS" == private ] && echo "Internal" || echo "External")
+export OPENSHIFT_USERNAME=$(armParm openshiftUsername)
+export ENABLE_AUTOSCALER=$(armVar enableAutoscaler)
+export OUTBOUND_TYPE=$(armVar outboundType)
+export CLUSTER_RESOURCE_GROUP_NAME=$(armParm clusterResourceGroupName)
+export API_KEY=$(vaultSecret apiKey)
+export OPENSHIFT_VERSION=$(armParm openshiftVersion)
+
 export INSTALLERHOME=/mnt/openshift
 mkdir -p $INSTALLERHOME
 chown $BOOTSTRAP_ADMIN_USERNAME:$BOOTSTRAP_ADMIN_USERNAME $INSTALLERHOME
@@ -59,46 +99,6 @@ function vaultSecret {
   vaultName=$(armParm clusterName)
   az keyvault secret show --vault-name ${vaultName} -n ${1} | jq -r '.value'
 }
-
-export BOOTSTRAP_ADMIN_USERNAME=$(armParm bootstrapAdminUsername)
-export OPENSHIFT_PASSWORD=$(vaultSecret openshiftPassword)
-export BOOTSTRAP_SSH_PUBLIC_KEY=$(armParm bootstrapSshPublicKey)
-export COMPUTE_INSTANCE_COUNT=$(armParm computeInstanceCount)
-export CONTROLPLANE_INSTANCE_COUNT=$(armParm controlplaneInstanceCount)
-export SUBSCRIPTION_ID=$(az account show | jq -r '.id')
-export TENANT_ID=$(az account show | jq -r '.tenantId')
-export AAD_APPLICATION_ID=$(armParm aadApplicationId)
-export AAD_APPLICATION_SECRET=$(vaultSecret aadApplicationSecret)
-export RESOURCE_GROUP_NAME=$RESOURCE_GROUP
-export LOCATION=$RESOURCE_GROUP_LOCATION
-export VIRTUAL_NETWORK_NAME=$(armParm virtualNetworkName)
-export SINGLE_ZONE_OR_MULTI_ZONE=az
-export DNS_ZONE_NAME=$(armParm dnsZoneName)
-export CONTROL_PLANE_VM_SIZE=$(armParm controlplaneVmSize)
-export CONTROL_PLANE_DISK_SIZE=$(armParm controlplaneDiskSize)
-export CONTROL_PLANE_DISK_TYPE=$(armParm controlplaneDiskType)
-export COMPUTE_VM_SIZE=$(armParm computeVmSize)
-export COMPUTE_DISK_SIZE=$(armParm computeDiskSize)
-export COMPUTE_DISK_TYPE=$(armParm computeDiskType)
-export CLUSTER_NAME=$(armParm clusterName)
-export CLUSTER_NETWORK_CIDR=$(armVar clusterNetworkCidr)
-export HOST_ADDRESS_PREFIX=$(armVar hostAddressPrefix)
-export VIRTUAL_NETWORK_CIDR=$(armParm virtualNetworkCIDR)
-export SERVICE_NETWORK_CIDR=$(armVar serviceNetworkCidr)
-export DNS_ZONE_RESOURCE_GROUP=$(armParm dnsZoneResourceGroup)
-export NETWORK_RESOURCE_GROUP=$RESOURCE_GROUP
-export CONTROL_PLANE_SUBNET_NAME=$(armVar controlplaneSubnetName)
-export COMPUTE_SUBNET_NAME=$(armVar computeSubnetName)
-export PULL_SECRET=$(vaultSecret pullSecret)
-export ENABLE_FIPS=$(armVar enableFips)
-export PRIVATE_OR_PUBLIC_ENDPOINTS=$(armVar privateOrPublicEndpoints)
-export PRIVATE_OR_PUBLIC=$([ "$PRIVATE_OR_PUBLIC_ENDPOINTS" == private ] && echo "Internal" || echo "External")
-export OPENSHIFT_USERNAME=$(armParm openshiftUsername)
-export ENABLE_AUTOSCALER=$(armVar enableAutoscaler)
-export OUTBOUND_TYPE=$(armVar outboundType)
-export CLUSTER_RESOURCE_GROUP_NAME=$(armParm clusterResourceGroupName)
-export API_KEY=$(vaultSecret apiKey)
-export OPENSHIFT_VERSION=$(armParm openshiftVersion)
 
 # Wait for cloud-init to finish
 count=0
