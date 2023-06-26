@@ -32,6 +32,34 @@ DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP | jq -r 'map(selec
 DEPLOYMENT_PARMS=$(az deployment group show -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME --query properties.parameters)
 DEPLOYMENT_VARS=$(az deployment group export -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME)
 
+# Retrieve parameters from an ARM deployment
+function armParm {
+  # local parmOut=$(az deployment group show -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME --query properties.parameters.${1})
+  local parmOut=$(echo $DEPLOYMENT_PARMS | jq -r ".${1}")
+  if [[ "$parmOut" == *keyVault* ]]; then
+    vaultName=$(echo $parmOut | jq -r '.reference.keyVault.id' | rev | cut -d/ -f1 | rev)
+    secretName=$(echo $parmOut | jq -r '.reference.secretName') 
+    # FIXME - Access controls may prevent access to this KV - not sure if this will be a real-world usage scenario
+    # echo "Attempting to retrieve ARM parameter '${1}' from keyvault '${vaultName}'"
+    az keyvault secret show --vault-name ${vaultName} -n ${secretName} | jq -r '.value'
+  else
+    echo $parmOut | jq -r '.value'
+  fi
+}
+
+# Retrieve value from ARM template's defined variables. Variables must be direct values and not contain
+# additional inline ARM function calls.
+function armVar {
+  echo $DEPLOYMENT_VARS | jq -r ".variables.${1}"
+}
+
+# Retrieve secret values from Azure Key Vault. When run as part of the ARM deployment, a new Azure Key Vault
+# is created and the VM's user-assigned managed identity is given "get" access on Secrets
+function vaultSecret {
+  vaultName=$(armParm clusterName)
+  az keyvault secret show --vault-name ${vaultName} -n ${1} | jq -r '.value'
+}
+
 export BOOTSTRAP_ADMIN_USERNAME=$(armParm bootstrapAdminUsername)
 export OPENSHIFT_PASSWORD=$(vaultSecret openshiftPassword)
 export BOOTSTRAP_SSH_PUBLIC_KEY=$(armParm bootstrapSshPublicKey)
@@ -71,34 +99,6 @@ export OUTBOUND_TYPE=$(armVar outboundType)
 export CLUSTER_RESOURCE_GROUP_NAME=$(armParm clusterResourceGroupName)
 export API_KEY=$(vaultSecret apiKey)
 export OPENSHIFT_VERSION=$(armParm openshiftVersion)
-
-# Retrieve parameters from an ARM deployment
-function armParm {
-  # local parmOut=$(az deployment group show -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME --query properties.parameters.${1})
-  local parmOut=$(echo $DEPLOYMENT_PARMS | jq -r ".${1}")
-  if [[ "$parmOut" == *keyVault* ]]; then
-    vaultName=$(echo $parmOut | jq -r '.reference.keyVault.id' | rev | cut -d/ -f1 | rev)
-    secretName=$(echo $parmOut | jq -r '.reference.secretName') 
-    # FIXME - Access controls may prevent access to this KV - not sure if this will be a real-world usage scenario
-    # echo "Attempting to retrieve ARM parameter '${1}' from keyvault '${vaultName}'"
-    az keyvault secret show --vault-name ${vaultName} -n ${secretName} | jq -r '.value'
-  else
-    echo $parmOut | jq -r '.value'
-  fi
-}
-
-# Retrieve value from ARM template's defined variables. Variables must be direct values and not contain
-# additional inline ARM function calls.
-function armVar {
-  echo $DEPLOYMENT_VARS | jq -r ".variables.${1}"
-}
-
-# Retrieve secret values from Azure Key Vault. When run as part of the ARM deployment, a new Azure Key Vault
-# is created and the VM's user-assigned managed identity is given "get" access on Secrets
-function vaultSecret {
-  vaultName=$(armParm clusterName)
-  az keyvault secret show --vault-name ${vaultName} -n ${1} | jq -r '.value'
-}
 
 # Wait for cloud-init to finish
 count=0
