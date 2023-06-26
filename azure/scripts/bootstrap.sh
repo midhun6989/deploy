@@ -4,7 +4,7 @@ set -ex
 export INSTALLERHOME=/mnt/openshift
 mkdir -p $INSTALLERHOME
 chown $BOOTSTRAP_ADMIN_USERNAME:$BOOTSTRAP_ADMIN_USERNAME $INSTALLERHOME
-DEBUG_LOG=$INSTALLERHOME/debug.log
+export DEBUG_LOG=$INSTALLERHOME/debug.log
 touch $DEBUG_LOG
 
 echo $(date) " - Updating Packages and Installing Package Dependencies" >> $DEBUG_LOG
