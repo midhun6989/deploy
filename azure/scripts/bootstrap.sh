@@ -50,10 +50,11 @@ touch $DEBUG_LOG
 echo $(date) " - Updating Packages and Installing Package Dependencies" >> $DEBUG_LOG
 sudo dnf update -y
 
-echo $(date) " - Installing Azure CLI, JQ and GIT" >> $DEBUG_LOG
+echo $(date) " - Install Azure CLI, JQ and GIT - Start" >> $DEBUG_LOG
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 sudo dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
 sudo dnf install -y azure-cli jq git
+echo $(date) " - Install Azure CLI, JQ and GIT - Complete" >> $DEBUG_LOG
 
 echo $(date) " - Azure CLI Login" >> $DEBUG_LOG
 az login --identity
