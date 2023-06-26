@@ -154,7 +154,7 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/experiments"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "git clone --branch bash-ansible https://github.com/midhun6989/experiments.git $INSTALLERHOME/experiments"
 
 # Substitute the variables in install-config.yaml file
-echo $(date) " - Variables substitution - Start"
+echo $(date) " - Variables Substitution - Start"
 sed -i "s/\$DNS_ZONE_NAME/$DNS_ZONE_NAME/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$COMPUTE_VM_SIZE/$COMPUTE_VM_SIZE/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$COMPUTE_DISK_SIZE/$COMPUTE_DISK_SIZE/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
@@ -187,7 +187,7 @@ sed -i "s/\$PULL_SECRET/$PULL_SECRET/g" $INSTALLERHOME/experiments/azure/scripts
 sed -i "s/\$ENABLE_FIPS/$ENABLE_FIPS/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$PRIVATE_OR_PUBLIC/$PRIVATE_OR_PUBLIC/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
 sed -i "s/\$BOOTSTRAP_SSH_PUBLIC_KEY/$BOOTSTRAP_SSH_PUBLIC_KEY/g" $INSTALLERHOME/experiments/azure/scripts/install-config.yaml
-echo $(date) " - Variables substitution - Complete"
+echo $(date) " - Variables Substitution - Complete"
 
 echo $(date) " - Setup Install Config - Start"
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLERHOME/openshiftfourx"
