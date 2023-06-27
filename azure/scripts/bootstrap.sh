@@ -28,6 +28,7 @@ RESOURCE_GROUP_LOCATION=$(az group show -g $RESOURCE_GROUP --query location -o t
 # FIXME this may still fail if you re-use a resource group that may have a resource with bootstrap.sh in the name.
 # Instead, if we set a unique bootnode name, then we can use the 'hostname' command and the filter below
 # To find the exact ARM Deployment that created this boot node!
+echo $(date) " - Get Deployment Details" >> $DEBUG_LOG
 DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP | jq -r 'map(select(.properties.dependencies[].resourceName | contains("bootstrap.sh"))) | .[] .name')
 DEPLOYMENT_PARMS=$(az deployment group show -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME --query properties.parameters)
 DEPLOYMENT_VARS=$(az deployment group export -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME)
@@ -60,6 +61,7 @@ function vaultSecret {
   az keyvault secret show --vault-name ${vaultName} -n ${1} | jq -r '.value'
 }
 
+echo $(date) " - Get Deployment Parameters and Variables - Start" >> $DEBUG_LOG
 export BOOTSTRAP_ADMIN_USERNAME=$(armParm bootstrapAdminUsername)
 export OPENSHIFT_PASSWORD=$(vaultSecret openshiftPassword)
 export BOOTSTRAP_SSH_PUBLIC_KEY=$(armParm bootstrapSshPublicKey)
@@ -99,6 +101,7 @@ export OUTBOUND_TYPE=$(armVar outboundType)
 export CLUSTER_RESOURCE_GROUP_NAME=$(armParm clusterResourceGroupName)
 export API_KEY=$(vaultSecret apiKey)
 export OPENSHIFT_VERSION=$(armParm openshiftVersion)
+echo $(date) " - Get Deployment Parameters and Variables - Complete" >> $DEBUG_LOG
 
 # Wait for cloud-init to finish
 count=0
@@ -244,8 +247,8 @@ runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLER_HOME/experiments
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc adm policy add-cluster-role-to-user cluster-admin '$OPENSHIFT_USERNAME'"
 echo $(date) " - Creating $OPENSHIFT_USERNAME User - Complete" >> $DEBUG_LOG
 
-echo $(date) " - Setting up IBM Operator Catalog" >> $DEBUG_LOG
+echo $(date) " - Setup IBM Operator Catalog - Start" >> $DEBUG_LOG
 runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLER_HOME/experiments/azure/scripts/ibm-operator-catalog.yaml"
-echo $(date) " - IBM Operator Catalog setup complete" >> $DEBUG_LOG
+echo $(date) " - Setup IBM Operator Catalog - Complete" >> $DEBUG_LOG
 
 echo $(date) " - ############### Deploy Script - Complete ###############" >> $DEBUG_LOG
