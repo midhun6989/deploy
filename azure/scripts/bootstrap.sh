@@ -1,6 +1,11 @@
 #!/bin/bash
 set -ex
 
+export INSTALLER_HOME=/mnt/openshift
+mkdir -p $INSTALLER_HOME
+export DEBUG_LOG=$INSTALLER_HOME/debug.log
+touch $DEBUG_LOG
+
 echo $(date) " - Updating Packages and Installing Package Dependencies" >> $DEBUG_LOG
 sudo dnf update -y
 
