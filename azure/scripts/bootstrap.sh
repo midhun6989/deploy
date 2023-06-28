@@ -22,5 +22,5 @@ pip3 install ansible[azure]
 echo $(date) " - Install Ansible - Complete" >> $DEBUG_LOG
 
 echo $(date) " - Install Podman - Start" >> $DEBUG_LOG
-ansible-playbook $INSTALLER_HOME/experiments/azure/scripts/install-softwares.yml
+ansible-playbook $INSTALLER_HOME/experiments/azure/scripts/install-podman.yml
 echo $(date) " - Install Podman - Complete" >> $DEBUG_LOG
