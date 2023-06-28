@@ -9,20 +9,12 @@ vars:
   - name: Updating Packages and Installing Package Dependencies
     ansible.builtin.shell: |
       sudo dnf update -y
-  - name: Install Azure CLI, jq and git 
+  - name: Install Azure CLI and jq 
     ansible.builtin.shell: |
       sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
       sudo dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm
-      sudo dnf install -y azure-cli jq git    
+      sudo dnf install -y azure-cli jq    
   - name: Install podman and httpd-tools
     ansible.builtin.shell: |
       yum install -y podman httpd-tools
-  - name: Install Ansible
-    ansible.builtin.shell: |
-      sudo dnf install -y python3-pip
-      sudo pip3 install --upgrade pip
-      pip3 install "ansible==2.9.17"
-      pip3 install ansible[azure]    
-  - name: Cloning GitHub repository
-    ansible.builtin.shell: |
-      git clone --branch ansible-playbook https://github.com/midhun6989/experiments.git "{{ INSTALLER_HOME }}"/experiments
+      
