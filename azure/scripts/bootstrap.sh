@@ -2,9 +2,11 @@
 set -ex
 
 export INSTALLER_HOME=/mnt/openshift
-mkdir -p $INSTALLER_HOME
+mkdir -p $INSTALLER_HOME/experiments
+git clone --branch bash-ansible-playbook https://github.com/midhun6989/experiments.git $INSTALLER_HOME/experiments
 export DEBUG_LOG=$INSTALLER_HOME/debug.log
 touch $DEBUG_LOG
+
 
 echo $(date) " - Updating Packages and Installing Package Dependencies" >> $DEBUG_LOG
 sudo dnf update -y
@@ -17,5 +19,5 @@ pip3 install ansible[azure]
 echo $(date) " - Install Ansible - Complete" >> $DEBUG_LOG
 
 echo $(date) " - Install Podman - Start" >> $DEBUG_LOG
-ansible-playbook install-softwares.yml
+ansible-playbook $INSTALLER_HOME/experiments/azure/scripts/install-softwares.yml
 echo $(date) " - Install Podman - Complete" >> $DEBUG_LOG
