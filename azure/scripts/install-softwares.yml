@@ -1,0 +1,6 @@
+---
+- name: installing podman
+  hosts: localhost
+  package:
+    name: "podman"
+    state: present

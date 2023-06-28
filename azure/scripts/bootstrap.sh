@@ -15,3 +15,7 @@ sudo pip3 install --upgrade pip
 pip3 install "ansible==2.9.17"
 pip3 install ansible[azure]
 echo $(date) " - Install Ansible - Complete" >> $DEBUG_LOG
+
+echo $(date) " - Install Podman - Start" >> $DEBUG_LOG
+ansible-playbook install-softwares.yml
+echo $(date) " - Install Podman - Complete" >> $DEBUG_LOG
