@@ -10,7 +10,8 @@ echo $(date) " - Updating Packages and Installing Package Dependencies" >> $DEBU
 sudo dnf update -y
 
 echo $(date) " - Install Ansible - Start" >> $DEBUG_LOG
-pip install 'ansible[azure]'
-ansible-galaxy collection install azure.azcollection
-pip install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt
+sudo dnf install -y python3-pip
+sudo pip3 install --upgrade pip
+pip3 install "ansible==2.9.17"
+pip3 install ansible[azure]
 echo $(date) " - Install Ansible - Complete" >> $DEBUG_LOG
