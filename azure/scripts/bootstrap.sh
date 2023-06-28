@@ -3,13 +3,16 @@ set -ex
 
 export INSTALLER_HOME=/mnt/openshift
 mkdir -p $INSTALLER_HOME/experiments
-git clone --branch bash-ansible-playbook https://github.com/midhun6989/experiments.git $INSTALLER_HOME/experiments
 export DEBUG_LOG=$INSTALLER_HOME/debug.log
 touch $DEBUG_LOG
 
-
 echo $(date) " - Updating Packages and Installing Package Dependencies" >> $DEBUG_LOG
 sudo dnf update -y
+
+echo $(date) " - Install GIT - Start" >> $DEBUG_LOG
+sudo dnf install -y git
+echo $(date) " - Install GIT - Complete" >> $DEBUG_LOG
+git clone --branch ansible-playbook https://github.com/midhun6989/experiments.git $INSTALLER_HOME/experiments
 
 echo $(date) " - Install Ansible - Start" >> $DEBUG_LOG
 sudo dnf install -y python3-pip
