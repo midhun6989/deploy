@@ -2,9 +2,6 @@
 - name: Install Softwares
   hosts: localhost
 
-vars:
-  INSTALLER_HOME: /mnt/openshift
-
   tasks:
   - name: Updating Packages and Installing Package Dependencies
     ansible.builtin.shell: |
