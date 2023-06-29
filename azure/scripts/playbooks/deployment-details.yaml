@@ -9,7 +9,9 @@
   - name: Resource Group Details
     ansible.builtin.shell: |
       RESOURCE_GROUP=$(az group list --query [0].name -o tsv)
+      echo "Resource Group is $RESOURCE_GROUP"
       RESOURCE_GROUP_LOCATION=$(az group show -g $RESOURCE_GROUP --query location -o tsv)   
+      echo "Resource Group Location is $RESOURCE_GROUP_LOCATION"
   - name: Deployment Details
     ansible.builtin.shell: |
       DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP | jq -r 'map(select(.properties.dependencies[].resourceName | contains("bootstrap.sh"))) | .[] .name')
