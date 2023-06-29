@@ -1,0 +1,12 @@
+---
+- name: Create User
+  hosts: localhost
+
+  tasks:
+  - name: Create User
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "htpasswd -c -B -b /tmp/.htpasswd '$OPENSHIFT_USERNAME' '$OPENSHIFT_PASSWORD'"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 5"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create secret generic htpass-secret --from-file=htpasswd=/tmp/.htpasswd -n openshift-config"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLER_HOME/experiments/azure/scripts/configs/openshift-auth.yaml"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc adm policy add-cluster-role-to-user cluster-admin '$OPENSHIFT_USERNAME'"

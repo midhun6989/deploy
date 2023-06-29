@@ -1,0 +1,30 @@
+---
+- name: Enable Autoscalar
+  hosts: localhost
+
+  tasks:
+  - name: Switch to Machine API project
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc project openshift-machine-api"
+  - name: Enable or Disable Autoscaler
+    ansible.builtin.shell: |
+      RESOURCE_GROUP=$(az group list --query [0].name -o tsv)
+      RESOURCE_GROUP_LOCATION=$(az group show -g $RESOURCE_GROUP --query location -o tsv)   
+  - name: Deployment Details
+    ansible.builtin.shell: |
+      if [[ $ENABLE_AUTOSCALER == "true" ]]; then
+        clusterid=$(oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].metadata.labels.machine\.openshift\.io/cluster-api-cluster}' --kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config)
+        sed -i "s/\${clusterid}/$clusterid/g" $INSTALLER_HOME/experiments/azure/scripts/configs/machine-autoscaler.yaml
+        sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLER_HOME/experiments/azure/scripts/configs/machine-autoscaler.yaml
+        sed -i "s/\${clusterid}/$clusterid/g" $INSTALLER_HOME/experiments/azure/scripts/configs/machine-health-check.yaml
+        sed -i "s/\${LOCATION}/$LOCATION/g" $INSTALLER_HOME/experiments/azure/scripts/configs/machine-health-check.yaml
+        echo $(date) " - Setup Cluster Autoscaler - Start" >> $DEBUG_LOG
+        runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLER_HOME/experiments/azure/scripts/configs/cluster-autoscaler.yaml"
+        echo $(date) " - Setup Cluster Autoscaler - Complete" >> $DEBUG_LOG
+        echo $(date) " - Setup Machine Autoscaler - Start" >> $DEBUG_LOG
+        runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLER_HOME/experiments/azure/scripts/configs/machine-autoscaler.yaml"
+        echo $(date) " - Setup Machine Autoscaler - Complete" >> $DEBUG_LOG
+        echo $(date) " - Setup Machine Health Checks - Start" >> $DEBUG_LOG
+        runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc create -f $INSTALLER_HOME/experiments/azure/scripts/configs/machine-health-check.yaml"
+        echo $(date) " - Setup Machine Health Checks - Complete" >> $DEBUG_LOG
+      fi

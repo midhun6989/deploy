@@ -1,0 +1,17 @@
+---
+- name: Deployment Details
+  hosts: localhost
+
+  tasks:
+  - name: Azure CLI Login
+    ansible.builtin.shell: |
+      az login --identity
+  - name: Resource Group Details
+    ansible.builtin.shell: |
+      RESOURCE_GROUP=$(az group list --query [0].name -o tsv)
+      RESOURCE_GROUP_LOCATION=$(az group show -g $RESOURCE_GROUP --query location -o tsv)   
+  - name: Deployment Details
+    ansible.builtin.shell: |
+      DEPLOYMENT_NAME=$(az deployment group list -g $RESOURCE_GROUP | jq -r 'map(select(.properties.dependencies[].resourceName | contains("bootstrap.sh"))) | .[] .name')
+      DEPLOYMENT_PARMS=$(az deployment group show -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME --query properties.parameters)
+      DEPLOYMENT_VARS=$(az deployment group export -g $RESOURCE_GROUP -n $DEPLOYMENT_NAME)

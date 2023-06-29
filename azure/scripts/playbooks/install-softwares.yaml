@@ -14,4 +14,3 @@
   - name: Install podman and httpd-tools
     ansible.builtin.shell: |
       yum install -y podman httpd-tools
-      

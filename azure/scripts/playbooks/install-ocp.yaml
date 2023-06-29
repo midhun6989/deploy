@@ -1,0 +1,75 @@
+---
+- name: Install OCP
+  hosts: localhost
+
+  tasks:
+  - name: Download Binaries
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-$OPENSHIFT_VERSION/openshift-install-linux.tar.gz"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-$OPENSHIFT_VERSION/openshift-client-linux.tar.gz"
+      chown $BOOTSTRAP_ADMIN_USERNAME:$BOOTSTRAP_ADMIN_USERNAME $INSTALLER_HOME
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "tar -xvf openshift-install-linux.tar.gz -C $INSTALLER_HOME"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sudo tar -xvf openshift-client-linux.tar.gz -C /usr/bin"
+      chmod +x /usr/bin/kubectl
+      chmod +x /usr/bin/oc
+      chmod +x $INSTALLER_HOME/openshift-install   
+  - name: Setup Azure Credentials for OCP
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p /home/$BOOTSTRAP_ADMIN_USERNAME/.azure"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "touch /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json"
+      cat > /home/$BOOTSTRAP_ADMIN_USERNAME/.azure/osServicePrincipal.json <<EOF
+      {"subscriptionId":"$SUBSCRIPTION_ID","clientId":"$AAD_APPLICATION_ID","clientSecret":"$AAD_APPLICATION_SECRET","tenantId":"$TENANT_ID"}
+      EOF
+  - name: Variables Substitution in install-config.yaml
+    ansible.builtin.shell: |
+      sed -i "s/\$DNS_ZONE_NAME/$DNS_ZONE_NAME/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$COMPUTE_VM_SIZE/$COMPUTE_VM_SIZE/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$COMPUTE_DISK_SIZE/$COMPUTE_DISK_SIZE/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$COMPUTE_DISK_TYPE/$COMPUTE_DISK_TYPE/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$COMPUTE_INSTANCE_COUNT/$COMPUTE_INSTANCE_COUNT/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$CONTROL_PLANE_VM_SIZE/$CONTROL_PLANE_VM_SIZE/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$CONTROL_PLANE_DISK_SIZE/$CONTROL_PLANE_DISK_SIZE/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$CONTROL_PLANE_DISK_TYPE/$CONTROL_PLANE_DISK_TYPE/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$CONTROLPLANE_INSTANCE_COUNT/$CONTROLPLANE_INSTANCE_COUNT/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$CLUSTER_NAME/$CLUSTER_NAME/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed  "s|\$CLUSTER_NETWORK_CIDR|$CLUSTER_NETWORK_CIDR|g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml >> $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml
+      rm $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      mv $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$HOST_ADDRESS_PREFIX/$HOST_ADDRESS_PREFIX/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed  "s|\$VIRTUAL_NETWORK_CIDR|$VIRTUAL_NETWORK_CIDR|g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml > $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml
+      rm $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      mv $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed  "s|\$SERVICE_NETWORK_CIDR|$SERVICE_NETWORK_CIDR|g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml > $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml
+      rm $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      mv $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$DNS_ZONE_RESOURCE_GROUP/$DNS_ZONE_RESOURCE_GROUP/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$LOCATION/$LOCATION/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$NETWORK_RESOURCE_GROUP/$NETWORK_RESOURCE_GROUP/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$VIRTUAL_NETWORK_NAME/$VIRTUAL_NETWORK_NAME/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$CONTROL_PLANE_SUBNET_NAME/$CONTROL_PLANE_SUBNET_NAME/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$COMPUTE_SUBNET_NAME/$COMPUTE_SUBNET_NAME/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$OUTBOUND_TYPE/$OUTBOUND_TYPE/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$CLUSTER_RESOURCE_GROUP_NAME/$CLUSTER_RESOURCE_GROUP_NAME/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$PULL_SECRET/$PULL_SECRET/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$ENABLE_FIPS/$ENABLE_FIPS/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$PRIVATE_OR_PUBLIC/$PRIVATE_OR_PUBLIC/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+      sed -i "s/\$BOOTSTRAP_SSH_PUBLIC_KEY/$BOOTSTRAP_SSH_PUBLIC_KEY/g" $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+  - name: Setup Install Config
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p $INSTALLER_HOME/openshiftfourx"
+      if [[ $SINGLE_ZONE_OR_MULTI_ZONE != "az" ]]; then
+        zones=`grep -A3 'zones' $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml`
+        grep -v $zones $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml > $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml
+        rm $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml
+        mv $INSTALLER_HOME/experiments/azure/scripts/configs/install-config-new.yaml $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml    
+      fi  
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLER_HOME/experiments/azure/scripts/configs/install-config.yaml $INSTALLER_HOME/openshiftfourx/install-config.yaml"
+  - name: Install OCP
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "export ARM_SKIP_PROVIDER_REGISTRATION=true"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "$INSTALLER_HOME/openshift-install create cluster --dir=$INSTALLER_HOME/openshiftfourx --log-level=debug"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "sleep 120"
+  - name: Setup Kube Config
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "mkdir -p /home/$BOOTSTRAP_ADMIN_USERNAME/.kube"
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "cp $INSTALLER_HOME/openshiftfourx/auth/kubeconfig /home/$BOOTSTRAP_ADMIN_USERNAME/.kube/config"                     

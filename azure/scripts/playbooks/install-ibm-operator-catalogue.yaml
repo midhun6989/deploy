@@ -1,0 +1,8 @@
+---
+- name: Install IBM Operator Catalogue
+  hosts: localhost
+
+  tasks:
+  - name: Install IBM Operator Catalogue
+    ansible.builtin.shell: |
+      runuser -l $BOOTSTRAP_ADMIN_USERNAME -c "oc apply -f $INSTALLER_HOME/experiments/azure/scripts/configs/ibm-operator-catalog.yaml"
